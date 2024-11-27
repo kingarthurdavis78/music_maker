@@ -36,28 +36,22 @@ Here are some examples of generated musical scores and corresponding audio:
 #### Generated Image
 ![Song 1](song_1.png)
 #### Audio
-<audio controls>
-  <source src="song_1.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+
+https://github.com/user-attachments/assets/e5c5e77f-4133-43ce-b7c4-bb6f8ee1459f
 
 ### Example 2
 #### Generated Image
 ![Song 2](song_2.png)
 #### Audio
-<audio controls>
-  <source src="song_2.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+
+https://github.com/user-attachments/assets/21b033bf-a214-4520-a21d-cc74ffebd545
 
 ### Example 3
 #### Generated Image
 ![Song 3](song_3.png)
 #### Audio
-<audio controls>
-  <source src="song_3.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+
+https://github.com/user-attachments/assets/83f32ad9-9eab-410d-b04b-fac3dd95fa6d
 
 ---
 
