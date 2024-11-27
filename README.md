@@ -2,7 +2,10 @@
 
 This repository contains a PyTorch implementation of a **Diffusion Model** for generating musical scores represented as images and converting them into audio files. The project demonstrates how machine learning models can create novel music by learning patterns from a dataset of musical scores.
 
-![Diffusion Process](diffusion.gif)
+<video autoplay loop muted>
+  <source src="diffusion.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ---
 
