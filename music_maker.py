@@ -364,27 +364,12 @@ plt.show()
 # Generate images
 images = sampling(model, 16)
 
-# Display generated images
-for i in range(16):
-    plt.subplot(4, 4, i+1)
-    plt.imshow(images[i].cpu().numpy().squeeze(), cmap='gray')
-    plt.axis('off')
-plt.show()
-
 # Save images, midi, and audio
-SAMPLE_RATE = 16000
-
 def save_image(img, filename):
     plt.imshow(img, cmap='gray')
     plt.axis('off')
     plt.savefig(filename + '.png')
     plt.close()
-
-def save_audio(pm: pretty_midi.PrettyMIDI, filename):
-    # Synthesize the MIDI data using fluidsynth
-    waveform = pm.fluidsynth(fs=SAMPLE_RATE)
-    # Save the waveform to a file
-    write(filename + '.wav', SAMPLE_RATE, waveform)
 
 def img_to_midi(img, filename):
     img[img == 1] = 127
@@ -409,6 +394,14 @@ def img_to_midi(img, filename):
 
     midi.write(filename + '.mid')
 
+def save_audio(pm: pretty_midi.PrettyMIDI, filename):
+    SAMPLE_RATE = 16000
+    # Synthesize the MIDI data using fluidsynth
+    waveform = pm.fluidsynth(fs=SAMPLE_RATE)
+    # Save the waveform to a file
+    write(filename + '.wav', SAMPLE_RATE, waveform)
+
+# Save images, midi, and audio
 for i in range(len(images)):
     img = images[i].cpu().numpy().squeeze()
     save_image(img, f'image{i}')
