@@ -10,6 +10,8 @@ from torch.optim import AdamW
 from torch.utils.data import Dataset, DataLoader
 
 import os
+from scipy.io.wavfile import write
+import pretty_midi
 
 device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 print(device)
@@ -261,7 +263,6 @@ def training(model, optimizer, dataloader, n_minibatches=2000):
       x0 = next(iter(dataloader))
       x0 = x0.to(device)
 
-
       # sample from the uniform distribution a batch of timesteps between 1 and T
       timesteps = torch.randint(1, MAX_TIMESTEPS, (batch_size,)).to(device)
 
@@ -312,9 +313,9 @@ def sampling(model, batch_size):
             xt += (beta[t]**0.5) * z
 
         if t % 100 == 0:
-          print(f"Sampling at t={t}")
-          plt.imshow(xt[0].cpu().numpy().squeeze(), cmap="gray")
-          plt.show()
+            print(f"Sampling at t={t}")
+            plt.imshow(xt[0].cpu().numpy().squeeze(), cmap="gray")
+            plt.show()
 
     return xt
 
@@ -336,7 +337,7 @@ class MidiDataset(Dataset):
           return self.__getitem__(idx + 1)
         return sample
 
-# Train and Generate Images
+# Train Model
 
 model = UNetModel(
         in_channels=1,
@@ -360,6 +361,7 @@ plt.plot(losses)
 plt.title("Loss over Time")
 plt.show()
 
+# Generate images
 images = sampling(model, 16)
 
 # Display generated images
@@ -369,36 +371,50 @@ for i in range(16):
     plt.axis('off')
 plt.show()
 
-
-import fluidsynth
-import pretty_midi
-from IPython import display
-
+# Save images, midi, and audio
 SAMPLE_RATE = 16000
 
-def display_audio(pm: pretty_midi.PrettyMIDI):
-  waveform = pm.fluidsynth(fs=SAMPLE_RATE)
-  # Take a sample of the generated waveform to mitigate kernel resets
-  return display.Audio(waveform, rate=SAMPLE_RATE)
+def save_image(img, filename):
+    plt.imshow(img, cmap='gray')
+    plt.axis('off')
+    plt.savefig(filename + '.png')
+    plt.close()
+
+def save_audio(pm: pretty_midi.PrettyMIDI, filename):
+    # Synthesize the MIDI data using fluidsynth
+    waveform = pm.fluidsynth(fs=SAMPLE_RATE)
+    # Save the waveform to a file
+    write(filename + '.wav', SAMPLE_RATE, waveform)
 
 def img_to_midi(img, filename):
-  img[img == 1] = 127
-  img[img == -1] = 0
-  midi = pretty_midi.PrettyMIDI()
-  piano = pretty_midi.Instrument(0)
-  midi.instruments.append(piano)
-  notes, frames = img.shape
+    img[img == 1] = 127
+    img[img == -1] = 0
+    midi = pretty_midi.PrettyMIDI()
+    piano = pretty_midi.Instrument(0)
+    midi.instruments.append(piano)
+    notes, frames = img.shape
 
-  prev_note = False
-  start = 0
+    prev_note = False
+    start = 0
 
-  for n in range(notes):
-      for f in range(frames):
-          if img[n, f] > 0 and not prev_note:
+    for n in range(notes):
+        for f in range(frames):
+            if img[n, f] > 0 and not prev_note:
               start = f
               prev_note = True
-          elif img[n, f] <= 0 and prev_note:
+            elif img[n, f] <= 0 and prev_note:
               end = f
               piano.notes.append(pretty_midi.Note(velocity=100, pitch=n, start=start/10, end=end/10))
               prev_note = False
-  midi.write(filename + '.mid')
+
+    midi.write(filename + '.mid')
+
+for i in range(len(images)):
+    img = images[i].cpu().numpy().squeeze()
+    save_image(img, f'image{i}')
+    img_to_midi(img, f'midi{i}')
+    pm = pretty_midi.PrettyMIDI(f'midi{i}.mid')
+    save_audio(pm, f'audio{i}')
+
+
+
